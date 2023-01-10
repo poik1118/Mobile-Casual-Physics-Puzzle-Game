@@ -6,8 +6,10 @@ public class Circle : MonoBehaviour
 {
     public int              circleLevel;
     public bool             isDrag;
+    public bool             isMerge;
     
     Rigidbody2D             rigid;
+    CircleCollider2D        circleCollider;
     Animator                anime;
     
     void Awake()
@@ -53,4 +55,56 @@ public class Circle : MonoBehaviour
         isDrag = false;
         rigid.simulated = true;
     }
+
+    void OnCollisionStay2D(Collision2D collision)
+    {
+        if(collision.gameObject.tag == "Circle"){
+            Circle other = collision.gameObject.GetComponent<Circle>();
+
+            if(circleLevel == other.circleLevel && !isMerge && other.isMerge && circleLevel < 7){
+                // 나와 상대편 위치 가져오기
+                float myX = transform.position.x;
+                float myY = transform.position.y;
+
+                float otherX = other.transform.position.x;
+                float otherY = other.transform.position.y;
+                
+                // 내가 아래에 있을  때, 동일한 높이일 때 내가 오른쪽에 있을때
+                if(myY < otherY ||  (myY == otherY && myX > otherX)){
+                    // 상대방은 숨기기
+                    other.Hide(transform.position);
+
+                    // 자신 레벨업
+                }
+
+            }
+
+        }
+    }
+
+    public void Hide(Vector3 targetPos){
+        isMerge = true;
+
+        rigid.simulated = false;            // 물리효과 비활성
+        circleCollider.enabled  = false;    // 콜라이더 비활성화
+
+        StartCoroutine(HideRoutine(targetPos));
+
+    }
+
+    IEnumerator HideRoutine(Vector3 targetPos){
+        int frameCount = 0;
+
+        while(frameCount < 20){
+            frameCount++;
+            transform.position = Vector3.Lerp(transform.position, targetPos, 1.0f);
+
+            yield return null;
+        }
+
+        isMerge = false;
+        gameObject.SetActive(false);
+        
+    }
+
 }

@@ -139,6 +139,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   circleLevel: 0
   isDrag: 0
+  isMerge: 0
 --- !u!95 &3500269439599170248
 Animator:
   serializedVersion: 5

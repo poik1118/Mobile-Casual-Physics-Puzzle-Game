@@ -27,7 +27,8 @@ public class GameManager : MonoBehaviour
     void NextCircle(){
         Circle newCircle = GetCircle();
         lastCircle = newCircle;
-        //lastCircle.circleLevel = Random.Range(0, 8);    // 오브젝트 랜덤 레벨 선 결정
+
+        lastCircle.circleLevel = Random.Range(0, 2);    // 오브젝트 랜덤 레벨 선 결정
         lastCircle.gameObject.SetActive(true);          // 후 오브젝트 활성화
 
         StartCoroutine(WaitNextCircle());
