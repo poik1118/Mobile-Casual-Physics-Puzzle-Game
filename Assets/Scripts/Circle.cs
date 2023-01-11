@@ -58,10 +58,13 @@ public class Circle : MonoBehaviour
 
     void OnCollisionStay2D(Collision2D collision)
     {
+        Debug.Log("온콜리젼");
         if(collision.gameObject.tag == "Circle"){
+            Debug.Log("서클 태그 인식");
             Circle other = collision.gameObject.GetComponent<Circle>();
 
-            if(circleLevel == other.circleLevel && !isMerge && other.isMerge && circleLevel < 7){
+            if(circleLevel == other.circleLevel && !isMerge && !other.isMerge && circleLevel < 7){
+                Debug.Log("위치 가져오기");
                 // 나와 상대편 위치 가져오기
                 float myX = transform.position.x;
                 float myY = transform.position.y;
@@ -71,6 +74,7 @@ public class Circle : MonoBehaviour
                 
                 // 내가 아래에 있을  때, 동일한 높이일 때 내가 오른쪽에 있을때
                 if(myY < otherY ||  (myY == otherY && myX > otherX)){
+                    Debug.Log("같은 서클 인식");
                     // 상대방은 숨기기
                     other.Hide(transform.position);
 
@@ -86,7 +90,10 @@ public class Circle : MonoBehaviour
         isMerge = true;
 
         rigid.simulated = false;            // 물리효과 비활성
-        circleCollider.enabled  = false;    // 콜라이더 비활성화
+        Debug.Log("물리 효과 비활성");
+
+        circleCollider.enabled = false;     // 콜라이더 비활성화
+        Debug.Log("콜라이더 비활성");
 
         StartCoroutine(HideRoutine(targetPos));
 
@@ -97,7 +104,7 @@ public class Circle : MonoBehaviour
 
         while(frameCount < 20){
             frameCount++;
-            transform.position = Vector3.Lerp(transform.position, targetPos, 1.0f);
+            transform.position = Vector3.Lerp(transform.position, targetPos, 0.5f);
 
             yield return null;
         }
