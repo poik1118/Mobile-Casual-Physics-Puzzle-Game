@@ -15,6 +15,7 @@ public class Circle : MonoBehaviour
     void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
+        circleCollider = GetComponent<CircleCollider2D>();
         anime = GetComponent<Animator>();
     }
 
@@ -58,13 +59,10 @@ public class Circle : MonoBehaviour
 
     void OnCollisionStay2D(Collision2D collision)
     {
-        Debug.Log("온콜리젼");
         if(collision.gameObject.tag == "Circle"){
-            Debug.Log("서클 태그 인식");
             Circle other = collision.gameObject.GetComponent<Circle>();
 
             if(circleLevel == other.circleLevel && !isMerge && !other.isMerge && circleLevel < 7){
-                Debug.Log("위치 가져오기");
                 // 나와 상대편 위치 가져오기
                 float myX = transform.position.x;
                 float myY = transform.position.y;
@@ -74,11 +72,11 @@ public class Circle : MonoBehaviour
                 
                 // 내가 아래에 있을  때, 동일한 높이일 때 내가 오른쪽에 있을때
                 if(myY < otherY ||  (myY == otherY && myX > otherX)){
-                    Debug.Log("같은 서클 인식");
                     // 상대방은 숨기기
                     other.Hide(transform.position);
 
                     // 자신 레벨업
+                    LevelUp();
                 }
 
             }
@@ -90,21 +88,18 @@ public class Circle : MonoBehaviour
         isMerge = true;
 
         rigid.simulated = false;            // 물리효과 비활성
-        Debug.Log("물리 효과 비활성");
 
         circleCollider.enabled = false;     // 콜라이더 비활성화
-        Debug.Log("콜라이더 비활성");
 
         StartCoroutine(HideRoutine(targetPos));
 
     }
-
     IEnumerator HideRoutine(Vector3 targetPos){
         int frameCount = 0;
 
         while(frameCount < 20){
             frameCount++;
-            transform.position = Vector3.Lerp(transform.position, targetPos, 0.5f);
+            transform.position = Vector3.Lerp(transform.position, targetPos, 1.0f); 
 
             yield return null;
         }
@@ -114,4 +109,22 @@ public class Circle : MonoBehaviour
         
     }
 
+    void LevelUp(){
+        isMerge = true;
+
+        rigid.velocity = Vector2.zero;
+        rigid.angularVelocity = 0;
+
+        StartCoroutine(LevelUpRoutine());
+    }
+    IEnumerator LevelUpRoutine(){
+        yield return new WaitForSeconds(0.1f);
+
+        anime.SetInteger("Level", circleLevel + 1);     // 애니메이션
+
+        yield return new WaitForSeconds(0.1f);
+        circleLevel++;                                  // 실제 서클 레벨 증가
+
+        isMerge = false;
+    }
 }

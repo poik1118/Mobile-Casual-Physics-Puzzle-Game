@@ -535,7 +535,7 @@ GameObject:
   - component: {fileID: 1203961571}
   m_Layer: 0
   m_Name: Circle Group
-  m_TagString: Untagged
+  m_TagString: Circle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
