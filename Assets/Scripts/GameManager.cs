@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour
     public GameObject       circlePrefab;
     public Transform        circleGroup;
 
+    public int maxLevel;
 
     void Awake()
     {
@@ -27,8 +28,8 @@ public class GameManager : MonoBehaviour
     void NextCircle(){
         Circle newCircle = GetCircle();
         lastCircle = newCircle;
-
-        lastCircle.circleLevel = Random.Range(0, 2);    // 오브젝트 랜덤 레벨 선 결정
+        lastCircle.gameManager = this;
+        lastCircle.circleLevel = Random.Range(0, maxLevel);    // 오브젝트 랜덤 레벨 선 결정
         lastCircle.gameObject.SetActive(true);          // 후 오브젝트 활성화
 
         StartCoroutine(WaitNextCircle());

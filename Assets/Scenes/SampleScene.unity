@@ -290,6 +290,7 @@ MonoBehaviour:
   lastCircle: {fileID: 0}
   circlePrefab: {fileID: 5815799358197466989, guid: 51b0765918aa0e642894fad713e2e379, type: 3}
   circleGroup: {fileID: 1203961571}
+  maxLevel: 1
 --- !u!1 &600718867
 GameObject:
   m_ObjectHideFlags: 0
@@ -535,7 +536,7 @@ GameObject:
   - component: {fileID: 1203961571}
   m_Layer: 0
   m_Name: Circle Group
-  m_TagString: Circle
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

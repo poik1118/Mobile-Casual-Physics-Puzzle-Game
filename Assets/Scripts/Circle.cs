@@ -7,6 +7,8 @@ public class Circle : MonoBehaviour
     public int              circleLevel;
     public bool             isDrag;
     public bool             isMerge;
+
+    public GameManager      gameManager;
     
     Rigidbody2D             rigid;
     CircleCollider2D        circleCollider;
@@ -124,6 +126,8 @@ public class Circle : MonoBehaviour
 
         yield return new WaitForSeconds(0.1f);
         circleLevel++;                                  // 실제 서클 레벨 증가
+
+        gameManager.maxLevel = Mathf.Max(circleLevel, gameManager.maxLevel);
 
         isMerge = false;
     }
