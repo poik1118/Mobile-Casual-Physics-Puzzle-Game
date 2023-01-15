@@ -7,6 +7,8 @@ public class GameManager : MonoBehaviour
     public Circle           lastCircle;
     public GameObject       circlePrefab;
     public Transform        circleGroup;
+    public GameObject       effectPrefab;
+    public Transform        effectGroup;
 
     public int maxLevel;
 
@@ -19,9 +21,16 @@ public class GameManager : MonoBehaviour
         NextCircle();
     }
 
-    Circle GetCircle(){        // Circle 오브젝트 생성
+    Circle GetCircle(){     
+        // 이펙트 생성
+        GameObject instateEffectObj = Instantiate(effectPrefab, effectGroup);
+        ParticleSystem instateEffect  = instateEffectObj.GetComponent<ParticleSystem>();
+
+        // Circle 오브젝트 생성
         GameObject instate = Instantiate(circlePrefab, circleGroup);
         Circle instateCircle  = instate.GetComponent<Circle>();
+        instateCircle.particleEffect = instateEffect;
+
         return instateCircle;     
     }
 

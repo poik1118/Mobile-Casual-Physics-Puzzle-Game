@@ -9,6 +9,7 @@ public class Circle : MonoBehaviour
     public bool             isMerge;
 
     public GameManager      gameManager;
+    public ParticleSystem   particleEffect;
     
     Rigidbody2D             rigid;
     CircleCollider2D        circleCollider;
@@ -123,6 +124,7 @@ public class Circle : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
 
         anime.SetInteger("Level", circleLevel + 1);     // 애니메이션
+        EffectPlay();                                   // 이펙트 실행
 
         yield return new WaitForSeconds(0.1f);
         circleLevel++;                                  // 실제 서클 레벨 증가
@@ -130,5 +132,11 @@ public class Circle : MonoBehaviour
         gameManager.maxLevel = Mathf.Max(circleLevel, gameManager.maxLevel);
 
         isMerge = false;
+    }
+
+    void EffectPlay(){
+        particleEffect.transform.position = transform.position; 
+        particleEffect.transform.localScale = transform.localScale;
+        particleEffect.Play();
     }
 }
