@@ -8,18 +8,21 @@ public class Circle : MonoBehaviour
     public bool             isDrag;
     public bool             isMerge;
 
+    private float           deadTime;
+
     public GameManager      gameManager;
     public ParticleSystem   particleEffect;
-    
-    Rigidbody2D             rigid;
+    public Rigidbody2D             rigid;
     CircleCollider2D        circleCollider;
     Animator                anime;
+    SpriteRenderer          spriteRenderer;
     
     void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
         circleCollider = GetComponent<CircleCollider2D>();
         anime = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     void OnEnable()
@@ -91,8 +94,11 @@ public class Circle : MonoBehaviour
         isMerge = true;
 
         rigid.simulated = false;            // 물리효과 비활성
-
         circleCollider.enabled = false;     // 콜라이더 비활성화
+
+        if(targetPos == Vector3.up * 100){
+            EffectPlay();   // 게임 오버시 이펙트 활성화
+        }
 
         StartCoroutine(HideRoutine(targetPos));
 
@@ -102,10 +108,17 @@ public class Circle : MonoBehaviour
 
         while(frameCount < 20){
             frameCount++;
-            transform.position = Vector3.Lerp(transform.position, targetPos, 1.0f); 
+            if(targetPos != Vector3.up * 100){          // 레벨업 조건
+                transform.position = Vector3.Lerp(transform.position, targetPos,0.5f); 
+            }
+            else if(targetPos == Vector3.up * 100){     // 게임 오버 조건
+                transform.localScale = Vector3.Lerp(transform.localScale, Vector3.zero, 0.2f);
+            }
 
             yield return null;
         }
+
+        gameManager.score += (int)Mathf.Pow(2, circleLevel);
 
         isMerge = false;
         gameObject.SetActive(false);
@@ -138,5 +151,26 @@ public class Circle : MonoBehaviour
         particleEffect.transform.position = transform.position; 
         particleEffect.transform.localScale = transform.localScale;
         particleEffect.Play();
+    }
+
+    void OnTriggerStay2D(Collider2D collision)
+    {
+        if(collision.tag == "Finish"){
+            deadTime += Time.deltaTime;
+
+            if(deadTime > 2){
+                spriteRenderer.color = new Color(0.9f, 0.2f, 0.2f);
+            }
+            if(deadTime > 5){
+                gameManager.GameOver();
+            }
+        }
+    }
+    void OnTriggerExit2D(Collider2D collision)
+    {
+        if(collision.tag == "Finish"){
+            deadTime = 0;
+            spriteRenderer.color = Color.white;
+        }
     }
 }
