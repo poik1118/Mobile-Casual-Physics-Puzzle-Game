@@ -5,10 +5,17 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public Circle           lastCircle;
+
     public GameObject       circlePrefab;
     public Transform        circleGroup;
     public GameObject       effectPrefab;
     public Transform        effectGroup;
+
+    public AudioSource      bgmPlayer;
+    public AudioSource[]    sfxPlayer;
+    public AudioClip[]      sfxClip;
+    public enum sfx { LevelUp, Next, Attach, Button, GameOver };
+    int sfxCursor;
 
     public int maxLevel;
     public int score;
@@ -20,6 +27,7 @@ public class GameManager : MonoBehaviour
     }
     void Start()
     {
+        bgmPlayer.Play();
         NextCircle();
     }
 
@@ -33,7 +41,7 @@ public class GameManager : MonoBehaviour
         Circle instateCircle  = instate.GetComponent<Circle>();
         instateCircle.particleEffect = instateEffect;
 
-        return instateCircle;     
+        return instateCircle;
     }
 
     void NextCircle(){
