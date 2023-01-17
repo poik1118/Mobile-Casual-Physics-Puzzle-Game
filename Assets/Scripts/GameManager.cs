@@ -34,11 +34,14 @@ public class GameManager : MonoBehaviour
     int sfxCursor;
 
     [Header(" -----[ UI ]----- ")]
+    public GameObject       gameStartGroup;
     public GameObject       gameOverGroup;
     public Text             scoreText;
     public Text             maxScoreText;
     public Text             resultScoreText;
 
+    [Header(" -----[ Etc ]----- ")]
+    public GameObject       mapGroup;
 
     void Awake()
     {
@@ -57,10 +60,18 @@ public class GameManager : MonoBehaviour
         maxScoreText.text = PlayerPrefs.GetInt("MaxScore").ToString();
     }
 
-    void Start()
+    public void GameStart()
     {
+        gameStartGroup.SetActive(false);
+        mapGroup.SetActive(true);
+        scoreText.gameObject.SetActive(true);
+        maxScoreText.gameObject.SetActive(true);
+        
+
         bgmPlayer.Play();
-        NextCircle();
+        SFXplay(sfx.Button);
+
+        Invoke("NextCircle", 1.0f);
     }
 
     Circle MakeCircle(){
@@ -162,8 +173,12 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.SetInt("MaxScore", maxScore);
 
         // game over UI 표시
-        resultScoreText.text = "최종 점수 : "+scoreText.text;
+        resultScoreText.text = "최종 점수 : " + scoreText.text;
+
         gameOverGroup.SetActive(true);
+        mapGroup.SetActive(false);
+        scoreText.gameObject.SetActive(false);
+        maxScoreText.gameObject.SetActive(false);
 
         bgmPlayer.Stop();
         SFXplay(sfx.GameOver);
@@ -204,6 +219,12 @@ public class GameManager : MonoBehaviour
 
         sfxPlayer[sfxCursor].Play();
         sfxCursor = (sfxCursor + 1) % sfxPlayer.Length;
+    }
+
+    void Update(){
+        if(Input.GetButtonDown("Cancel")){
+            Application.Quit();
+        }
     }
 
     void LateUpdate()
