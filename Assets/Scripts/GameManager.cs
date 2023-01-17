@@ -1,57 +1,104 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    [Header(" -----[ Core ]------ ")]
+    public int maxLevel;
+    public int score;
+    public bool isOver;
+
+    [Header(" -----[ Object Pool ]----- ")]
     public Circle           lastCircle;
 
     public GameObject       circlePrefab;
     public Transform        circleGroup;
+    public List<Circle>     circlePool;
+
     public GameObject       effectPrefab;
     public Transform        effectGroup;
+    public List<ParticleSystem> effectPool;
 
+    [Range(1, 30)]
+    public int              poolSize;
+    public int              poolCursor;
+
+    [Header(" -----[ Audio ]----- ")]
     public AudioSource      bgmPlayer;
     public AudioSource[]    sfxPlayer;
     public AudioClip[]      sfxClip;
     public enum sfx { LevelUp, Next, Attach, Button, GameOver };
     int sfxCursor;
 
-    public int maxLevel;
-    public int score;
-    public bool isOver;
+    [Header(" -----[ UI ]----- ")]
+    public GameObject       gameOverGroup;
+    public Text             scoreText;
+    public Text             maxScoreText;
+    public Text             resultScoreText;
+
 
     void Awake()
     {
-        Application.targetFrameRate = 144;   // 목표 프레임 제한    
+        Application.targetFrameRate = 144;          // 목표 프레임 제한    
+
+        circlePool = new List<Circle>();            // circle 리스트 초기화
+        effectPool = new List<ParticleSystem>();    // effect 리스트 초기화
+
+        for( int index = 0; index < poolSize; index++ ){
+            MakeCircle();
+        }
+
+        if(!PlayerPrefs.HasKey("MaxScore")){
+            PlayerPrefs.SetInt("MaxScore", 0);
+        }
+        maxScoreText.text = PlayerPrefs.GetInt("MaxScore").ToString();
     }
+
     void Start()
     {
         bgmPlayer.Play();
         NextCircle();
     }
 
-    Circle GetCircle(){     
+    Circle MakeCircle(){
         // 이펙트 생성
         GameObject instateEffectObj = Instantiate(effectPrefab, effectGroup);
+        instateEffectObj.name = "Effect " + effectPool.Count;
         ParticleSystem instateEffect  = instateEffectObj.GetComponent<ParticleSystem>();
+        effectPool.Add(instateEffect);
 
         // Circle 오브젝트 생성
-        GameObject instate = Instantiate(circlePrefab, circleGroup);
-        Circle instateCircle  = instate.GetComponent<Circle>();
+        GameObject instateCircleObj = Instantiate(circlePrefab, circleGroup);
+        instateCircleObj.name = "Circle " + circlePool.Count;
+        Circle instateCircle  = instateCircleObj.GetComponent<Circle>();
+        instateCircle.gameManager = this;
         instateCircle.particleEffect = instateEffect;
+        circlePool.Add(instateCircle);
 
         return instateCircle;
     }
 
-    void NextCircle(){
-        if(isOver){
-            return;     // 게임오버시 서클 호출 정지
+    Circle GetCircle(){     
+        for( int index = 0; index < circlePool.Count; index++){
+            poolCursor = (poolCursor + 1) % circlePool.Count;
+
+            if(!circlePool[poolCursor].gameObject.activeSelf){
+                return circlePool[poolCursor];
+            }
         }
 
-        Circle newCircle = GetCircle();
-        lastCircle = newCircle;
-        lastCircle.gameManager = this;
+        return MakeCircle();
+    }
+
+    void NextCircle(){
+        if(isOver){
+            return;         // 게임오버시 서클 호출 정지
+        }
+
+        lastCircle = GetCircle();
         lastCircle.circleLevel = Random.Range(0, maxLevel);   // 오브젝트 랜덤 레벨 선 결정
         lastCircle.gameObject.SetActive(true);                // 후 오브젝트 활성화
 
@@ -108,8 +155,28 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(0.1f);  // 순서대로 circle을 0.1초마다 지우기 
         }
 
-        yield return new WaitForSeconds(1.0f);
+        yield return new WaitForSeconds(0.5f);
+
+        // 최고 점수 갱신
+        int maxScore = Mathf.Max(score, PlayerPrefs.GetInt("MaxScore"));
+        PlayerPrefs.SetInt("MaxScore", maxScore);
+
+        // game over UI 표시
+        resultScoreText.text = "최종 점수 : "+scoreText.text;
+        gameOverGroup.SetActive(true);
+
+        bgmPlayer.Stop();
         SFXplay(sfx.GameOver);
+    }
+
+    public void Reset()
+    {
+        SFXplay(sfx.Button);
+        StartCoroutine(RestartRoutine());
+    }
+    IEnumerator RestartRoutine(){
+        yield return new WaitForSeconds(0.5f);
+        SceneManager.LoadScene("Main");
     }
 
     public void SFXplay(sfx type){
@@ -137,5 +204,10 @@ public class GameManager : MonoBehaviour
 
         sfxPlayer[sfxCursor].Play();
         sfxCursor = (sfxCursor + 1) % sfxPlayer.Length;
+    }
+
+    void LateUpdate()
+    {
+        scoreText.text = score.ToString();
     }
 }

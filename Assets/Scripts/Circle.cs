@@ -31,6 +31,25 @@ public class Circle : MonoBehaviour
         anime.SetInteger("Level", circleLevel);
     }
 
+    void OnDisable(){
+        // circle 속성 초기화
+        circleLevel = 0;
+        isDrag = false;
+        isMerge = false;
+        isAttach = false;
+
+        //circle transform 초기화
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
+        transform.localScale = Vector3.zero;
+
+        // circle 물리 초기화
+        rigid.simulated = false;
+        rigid.velocity = Vector2.zero;
+        rigid.angularVelocity = 0;
+        circleCollider.enabled = true;
+    }
+
     void Update()
     {
         if(isDrag){
