@@ -7,6 +7,7 @@ public class Circle : MonoBehaviour
     public int              circleLevel;
     public bool             isDrag;
     public bool             isMerge;
+    public bool             isAttach;
 
     private float           deadTime;
 
@@ -63,7 +64,24 @@ public class Circle : MonoBehaviour
         rigid.simulated = true;
     }
 
-    void OnCollisionStay2D(Collision2D collision)
+    void OnCollisionEnter2D( Collision2D other )
+    {
+        StartCoroutine( AttachRoutine() ); 
+    }
+    IEnumerator AttachRoutine(){
+        if( isAttach ){
+            yield break;
+        }
+
+        isAttach = true;
+        gameManager.SFXplay( GameManager.sfx.Attach );
+
+        yield return new WaitForSeconds( 0.2f );
+
+        isAttach = false;
+    }
+
+    void OnCollisionStay2D( Collision2D collision )
     {
         if(collision.gameObject.tag == "Circle"){
             Circle other = collision.gameObject.GetComponent<Circle>();
@@ -77,9 +95,9 @@ public class Circle : MonoBehaviour
                 float otherY = other.transform.position.y;
                 
                 // 내가 아래에 있을  때, 동일한 높이일 때 내가 오른쪽에 있을때
-                if(myY < otherY ||  (myY == otherY && myX > otherX)){
+                if( myY < otherY ||  (myY == otherY && myX > otherX) ){
                     // 상대방은 숨기기
-                    other.Hide(transform.position);
+                    other.Hide( transform.position );
 
                     // 자신 레벨업
                     LevelUp();
@@ -90,7 +108,7 @@ public class Circle : MonoBehaviour
         }
     }
 
-    public void Hide(Vector3 targetPos){
+    public void Hide( Vector3 targetPos ){
         isMerge = true;
 
         rigid.simulated = false;            // 물리효과 비활성
@@ -100,13 +118,13 @@ public class Circle : MonoBehaviour
             EffectPlay();   // 게임 오버시 이펙트 활성화
         }
 
-        StartCoroutine(HideRoutine(targetPos));
+        StartCoroutine( HideRoutine(targetPos) );
 
     }
-    IEnumerator HideRoutine(Vector3 targetPos){
+    IEnumerator HideRoutine( Vector3 targetPos ){
         int frameCount = 0;
 
-        while(frameCount < 20){
+        while( frameCount < 20 ){
             frameCount++;
             if(targetPos != Vector3.up * 100){          // 레벨업 조건
                 transform.position = Vector3.Lerp(transform.position, targetPos,0.5f); 
@@ -138,6 +156,8 @@ public class Circle : MonoBehaviour
 
         anime.SetInteger("Level", circleLevel + 1);     // 애니메이션
         EffectPlay();                                   // 이펙트 실행
+
+        gameManager.SFXplay(GameManager.sfx.LevelUp);
 
         yield return new WaitForSeconds(0.1f);
         circleLevel++;                                  // 실제 서클 레벨 증가
